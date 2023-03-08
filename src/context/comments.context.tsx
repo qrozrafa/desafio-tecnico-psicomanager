@@ -1,17 +1,18 @@
 import axios from "axios";
 import { createContext } from "react";
-import { CommentDto } from "../dtos";
+import { CommentDto, PostDto } from "../dtos";
 
 export const CommentsContext = createContext({
-  create: (comment: CommentDto): Promise<void> => { return Promise.resolve(); },
+  create: (comment: CommentDto, post: PostDto): Promise<void> => { return Promise.resolve(); },
   list: (postId: number): Promise<CommentDto[]> => { return Promise.resolve([]); },
 });
 
 export default function CommentsProvider(props: any) {
   const baseURL = process.env.REACT_APP_API_RB;
 
-  async function create(comment: CommentDto): Promise<void> {
-    return axios.post(`${baseURL}/post/comments`, comment);
+  async function create(comment: CommentDto, post: PostDto): Promise<void> {
+    const body = {comment, post}
+    return axios.post(`${baseURL}/comments`, body);
   }
 
   function list(postId: number): Promise<CommentDto[]> {

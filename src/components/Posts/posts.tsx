@@ -7,6 +7,7 @@ import { PostsContext } from '../../context';
 import Confirm from "../commons/confirm";
 import Comments from "./comments";
 import PostForm from "./post-form";
+import PostsLoading from "../commons/posts-loading";
 
 export default function Posts() {
   const postsContext = useContext(PostsContext);
@@ -16,12 +17,19 @@ export default function Posts() {
   const [formPostTarget, setFormPostTarget] = useState<PostDto | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [postsPerPage] = useState(6);
+  const [loadingPost, setLoadingPost] = useState(false);
 
-  useEffect(() => { loadPosts(); }, []);
+  useEffect(() => { 
+    setLoadingPost(true);
+    loadPosts(); 
+  }, []);
 
   function loadPosts() { 
     postsContext.list()
-    .then((list) => setPosts(list))
+    .then((list) => {
+      setLoadingPost(false)
+      setPosts(list)
+    })
     .catch((e) => window.alert(e));
   }
 
@@ -62,6 +70,10 @@ export default function Posts() {
     return setCurrentPage(pageNumber);
   }
 
+  if (loadingPost) {
+    return(<PostsLoading />) 
+  }
+
   return (
     <>
       <Grid
@@ -73,21 +85,23 @@ export default function Posts() {
         width={'100%'}
         ml={'auto'}
         mr={'auto'}
+        mb={6}
       >
+
         <Box
-          flexDirection={'column'}
-          mb={4}
+          flexDirection={"column"}
+          sx={{mt: 6, mb: 2}}
         >
-          <Typography variant='h4' sx={{mt: 4}}>Desafio psicomanager</Typography>
-          <Typography variant='body1' textAlign={'center'}>Rafael de Queiroz Silva</Typography>
+          <Typography variant='h4' textAlign={"center"}>Desafio psicomanager</Typography>
+          <Typography textAlign={"center"} color={'primary'}>Listagem de Postagem</Typography>
         </Box>
+
         <Grid
           item
           xs={10}
         >
           <Button
             variant='contained'
-            color='success'
             size='small'
             sx={{justifySelf:'left'}}
             onClick={() => setFormPostTarget({

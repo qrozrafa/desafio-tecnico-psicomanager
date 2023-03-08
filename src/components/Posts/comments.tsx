@@ -10,12 +10,12 @@ const cleanComment: CommentDto = {
   body: '',
 };
 
-interface ConfirmProps {
+interface CommentProps {
   post?: PostDto | null;
   onClose: () => void;
 }
 
-export default function Comments(props: ConfirmProps) {
+export default function Comments(props: CommentProps) {
   const commentsContext = useContext(CommentsContext);
   const [comments, setComments] = useState<CommentDto[]>([]);
   const [comment, setComment] = useState<CommentDto>({ ...cleanComment });
