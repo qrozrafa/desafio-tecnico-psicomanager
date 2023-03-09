@@ -10,7 +10,7 @@ interface ConfirmProps {
 
 export default function Confirm(props: ConfirmProps) {
   return (
-    <Dialog 
+    <Dialog
       open={props.show}
       disableEscapeKeyDown
     >

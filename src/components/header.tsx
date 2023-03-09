@@ -13,8 +13,8 @@ export default function Header() {
         pt={3}
         mb={8}
       >
-        <AppBar position="fixed" sx={{bgcolor: "#EEEEEE",}}>
-          <Box 
+        <AppBar position="fixed" sx={{ bgcolor: "#EEEEEE", }}>
+          <Box
             display={"flex"}
             justifyContent={"space-between"}
             width={"100%"}
@@ -23,7 +23,7 @@ export default function Header() {
             mr={"auto"}
             p={1}
           >
-            <img src={Logo} height={"42px"} alt="Logo da psicomanager"/>
+            <img src={Logo} height={"42px"} alt="Logo da psicomanager" />
 
             <Box
               display={"flex"}
@@ -32,9 +32,9 @@ export default function Header() {
               sx={{ flexGrow: 0 }}
               mr={3}
             >
-              <Typography textAlign={"center"} color={'#969696'} sx={{mr: 1}}>Rafael de Queiroz Silva</Typography>
+              <Typography textAlign={"center"} color={'#969696'} sx={{ mr: 1 }}>Rafael de Queiroz Silva</Typography>
               <Tooltip title="Desenvolver front-end">
-                <IconButton sx={{ p: 0 }}>
+                <IconButton sx={{ p: 0, cursor: 'default' }}>
                   <Avatar alt="Remy Sharp" src={imgAvatar} />
                 </IconButton>
               </Tooltip>

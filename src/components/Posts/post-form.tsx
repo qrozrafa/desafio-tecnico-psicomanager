@@ -1,7 +1,9 @@
 import { Close } from '@mui/icons-material';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, IconButton, TextField } from '@mui/material';
 import { PostDto } from '../../dtos';
+import { AlertContext } from '../../context';
+import Alert from '../commons/alert';
 
 interface PostFormProps {
   post?: PostDto | null;
@@ -10,7 +12,9 @@ interface PostFormProps {
 }
 
 export default function PostForm(props: PostFormProps) {
+  const alertContext = useContext(AlertContext);
   const [changed, setChanged] = useState<boolean>(false);
+  const [alert, setAlert] = useState<boolean>(false);
   const [post, setPost] = useState<PostDto>({
     title: '',
     body: '',
@@ -18,7 +22,7 @@ export default function PostForm(props: PostFormProps) {
 
   useEffect(() => {
     if (!props.post) return;
-    
+
     setChanged(false);
     setPost(props.post);
   }, [props.post]);
@@ -33,14 +37,17 @@ export default function PostForm(props: PostFormProps) {
 
   function handleSubmit() {
     if (post.title.length < 3) {
-      window.alert('O título deve conter pelo menos 3 letras.');
+      setAlert(true);
+      alertContext.error('O título deve conter pelo menos 3 letras.');
       return;
     }
     if (post.body.length < 3) {
-      window.alert('O texto deve conter pelo menos 3 letras.');
+      setAlert(true);
+      alertContext.error('O texto deve conter pelo menos 3 letras.');
       return;
     }
 
+    setAlert(false)
     props.onCreate(post);
   }
 
@@ -56,6 +63,7 @@ export default function PostForm(props: PostFormProps) {
         {props.post?.id ? 'Editar' : 'Criar'} Post
       </DialogTitle>
       <DialogContent>
+        <Alert status={alert} />
         <Grid
           container
           justifyContent={"center"}
@@ -73,13 +81,13 @@ export default function PostForm(props: PostFormProps) {
               value={post.title}
               size="small"
               fullWidth
-              onChange={(e) => handleChange('title', e.target.value || '')}  
+              onChange={(e) => handleChange('title', e.target.value || '')}
             />
           </Grid>
           <Grid
             item
             xs={12}
-          >  
+          >
             <TextField
               multiline
               rows={4}

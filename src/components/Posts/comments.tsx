@@ -1,9 +1,10 @@
 import { Close } from '@mui/icons-material';
 import { useCallback, useContext, useEffect, useState } from 'react';
-import { Alert, Button, Collapse, Dialog, DialogActions, DialogContent, DialogTitle, Divider, Grid, IconButton, List, ListItem, TextField, Typography } from '@mui/material';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, Grid, IconButton, List, ListItem, TextField, Typography } from '@mui/material';
 import { CommentDto, PostDto } from '../../dtos';
-import { CommentsContext, SnackbarContext } from '../../context';
+import { AlertContext, CommentsContext, SnackbarContext } from '../../context';
 import BackDrop from '../commons/backdrop';
+import Alert from '../commons/alert';
 
 const cleanComment: CommentDto = {
   name: '',
@@ -19,20 +20,17 @@ interface CommentProps {
 export default function Comments(props: CommentProps) {
   const snackbarContext = useContext(SnackbarContext);
   const commentsContext = useContext(CommentsContext);
+  const alertContext = useContext(AlertContext);
   const [comments, setComments] = useState<CommentDto[]>([]);
   const [comment, setComment] = useState<CommentDto>({ ...cleanComment });
-  const [status, setStatus] = useState({
-    type: '',
-    mensagem: '',
-  });
-  const [open, setOpen] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [changed, setChanged] = useState<boolean>(false);
+  const [alert, setAlert] = useState<boolean>(false);
 
   const loadComments = useCallback((postId: number) => {
     setComment({ ...cleanComment });
     setProcessing(true);
-    
+
     commentsContext.list(postId)
       .then((list) => setComments(list))
       .catch(() => snackbarContext.error('Erro ao carregar comentários do post.'))
@@ -41,7 +39,7 @@ export default function Comments(props: CommentProps) {
 
   useEffect(() => {
     if (!props.post) return;
-    
+
     setChanged(false);
     loadComments(props.post.id!);
   }, [props.post, loadComments]);
@@ -58,39 +56,39 @@ export default function Comments(props: CommentProps) {
   function handleSubmitComment() {
     const emailRegExp = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
     if (!comment.name) {
-      setStatus({type: 'error', mensagem: 'É necessário preencher o campo nome.'});
-      setOpen(true);
+      setAlert(true);
+      alertContext.error('É necessário preencher o campo nome.');
       return;
     }
     if (comment.name.length < 3) {
-      setStatus({type: 'error', mensagem: 'O nome deve conter pelo menos 3 letras.'});
-      setOpen(true);
+      setAlert(true);
+      alertContext.error('O nome deve conter pelo menos 3 letras.');
       return;
     }
     if (comment.email.length === 0) {
-      setStatus({type: 'error', mensagem: 'É necessário preencher o campo email.'});
-      setOpen(true);
+      setAlert(true);
+      alertContext.error('É necessário preencher o campo email.');
       return;
     }
     if (!comment.email.match(emailRegExp)) {
-      setStatus({type: 'error', mensagem: 'É necessário informado um email válido.'});
-      setOpen(true);
+      setAlert(true);
+      alertContext.error('É necessário informar um email válido.');
       return;
     }
     if (comment.body.length < 3) {
-      setStatus({type: 'error', mensagem: 'O comentário deve conter pelo menos 3 letras.'});
-      setOpen(true);
+      setAlert(true);
+      alertContext.error('O comentário deve conter pelo menos 3 letras.');
       return;
     }
 
     const postId = props.post?.id!;
     commentsContext.create({ ...comment, postId })
-    .then(() => {
-      snackbarContext.success('Comentário adicionado com sucesso.')
-      loadComments(postId);
-      setOpen(false);
-    })
-    .catch(() => snackbarContext.error('Erro ao tentar criar comentário.'));
+      .then(() => {
+        setAlert(false);
+        snackbarContext.success('Comentário adicionado com sucesso.');
+        loadComments(postId);
+      })
+      .catch(() => snackbarContext.error('Erro ao tentar criar comentário.'));
   }
 
   return (
@@ -104,16 +102,16 @@ export default function Comments(props: CommentProps) {
             <Close />
           </IconButton>
           Comentários
-          <Typography 
+          <Typography
             variant='body1'
-            sx={{mt: 1}}
+            sx={{ mt: 1 }}
             textAlign={"center"}
           >
             Post: <b>{props.post?.title}</b>
           </Typography>
-          <Typography 
+          <Typography
             variant='subtitle2'
-            sx={{mt: 1}}
+            sx={{ mt: 1 }}
           >
             <b>{comments.length}</b> {comments.length > 1 ? 'comentários' : 'comentário'}
           </Typography>
@@ -133,20 +131,20 @@ export default function Comments(props: CommentProps) {
                     xs={12}
                   >
                     <Divider />
-                    <Typography 
+                    <Typography
                       variant='body1'
-                      sx={{mt: 1}}
+                      sx={{ mt: 1 }}
                     >
                       <b>Autor:</b> {item.name}
                     </Typography>
-                  </Grid>  
+                  </Grid>
                   <Grid
                     item
                     xs={10}
                     mt={1}
                   >
                     <Typography variant='subtitle2'>{item.body}</Typography>
-                  </Grid> 
+                  </Grid>
                 </Grid>
               </ListItem>
             )}
@@ -162,31 +160,7 @@ export default function Comments(props: CommentProps) {
             alignContent={"center"}
             p={1}
           >
-            {status.type === "error" ? (
-              <Collapse in={open}>
-                <Alert 
-                  variant="outlined" 
-                  severity="error"
-                  sx={{mb: 1}}
-                  action={
-                    <IconButton
-                      aria-label="close"
-                      color="inherit"
-                      size="small"
-                      onClick={() => {
-                        setOpen(false);
-                      }}
-                    >
-                      <Close fontSize="inherit" />
-                    </IconButton>
-                  }
-                >
-                  {status.mensagem}
-                </Alert>
-              </Collapse>
-              ) : (
-              ""
-            )}
+            <Alert status={alert} />
             <Grid
               item
               xs={12}
@@ -199,7 +173,7 @@ export default function Comments(props: CommentProps) {
                 value={comment.name}
                 onChange={(e) => handleChangeComment('name', e.target.value || '')}
                 fullWidth
-                size='small'  
+                size='small'
               />
             </Grid>
             <Grid
@@ -210,13 +184,12 @@ export default function Comments(props: CommentProps) {
               <TextField
                 label="Email"
                 placeholder='Email'
-                type="text"
-                required
+                type="email"
                 value={comment.email}
                 onChange={(e) => handleChangeComment('email', e.target.value || '')}
                 fullWidth
                 size='small'
-              />  
+              />
             </Grid>
             <Grid
               item
@@ -233,7 +206,7 @@ export default function Comments(props: CommentProps) {
                 onChange={(e) => handleChangeComment('body', e.target.value || '')}
                 fullWidth
                 size='small'
-              />   
+              />
             </Grid>
             <Button
               onClick={handleSubmitComment}
@@ -247,7 +220,7 @@ export default function Comments(props: CommentProps) {
           </Grid>
         </DialogActions>
       </Dialog>
-      <BackDrop show={processing}/>
+      <BackDrop show={processing} />
     </>
   );
 }

@@ -21,20 +21,20 @@ export default function Posts() {
   const [postsPerPage] = useState(6);
   const [loadingPost, setLoadingPost] = useState(false);
   const [processing, setProcessing] = useState(false);
-  
-  const loadPosts = useCallback(() => { 
+
+  const loadPosts = useCallback(() => {
     setProcessing(true);
 
     postsContext.list()
-    .then((list) => {
-      setLoadingPost(false);
-      setPosts(list);
-    })
-    .catch((e) => snackbarContext.error(e))
-    .finally(() => setProcessing(false));
+      .then((list) => {
+        setLoadingPost(false);
+        setPosts(list);
+      })
+      .catch((e) => snackbarContext.error(e))
+      .finally(() => setProcessing(false));
   }, [postsContext, snackbarContext]);
-  
-  useEffect(() => { 
+
+  useEffect(() => {
     setLoadingPost(true);
     loadPosts();
   }, [loadPosts]);
@@ -43,16 +43,16 @@ export default function Posts() {
     setProcessing(true);
 
     postsContext
-    .remove(post.id!)
-    .then(() => {
-      snackbarContext.success('Post removido com sucesso.')
-      loadPosts();
-    })
-    .catch(() => snackbarContext.error('Erro ao tentar remover post.'))
-    .finally(() => {
-      setRemovePostTarget(null);
-      setProcessing(false);
-    });
+      .remove(post.id!)
+      .then(() => {
+        snackbarContext.success('Post removido com sucesso.')
+        loadPosts();
+      })
+      .catch(() => snackbarContext.error('Erro ao tentar remover post.'))
+      .finally(() => {
+        setRemovePostTarget(null);
+        setProcessing(false);
+      });
   };
 
   function handleSave(post: PostDto) {
@@ -69,13 +69,13 @@ export default function Posts() {
 
     postsContext
     [post.id ? 'update' : 'create'](post)
-    .then(() => {
-      snackbarContext.success('Post salvo com sucesso.')
-      setFormPostTarget(null);
-      loadPosts();
-    })
-    .catch(() => snackbarContext.error('Erro ao tentar salvar post.'))
-    .finally(() => setProcessing(false));
+      .then(() => {
+        snackbarContext.success('Post salvo com sucesso.')
+        setFormPostTarget(null);
+        loadPosts();
+      })
+      .catch(() => snackbarContext.error('Erro ao tentar salvar post.'))
+      .finally(() => setProcessing(false));
   };
 
 
@@ -88,7 +88,7 @@ export default function Posts() {
   }
 
   if (loadingPost) {
-    return(<PostsLoading />) 
+    return (<PostsLoading />)
   }
 
   return (
@@ -107,7 +107,7 @@ export default function Posts() {
 
         <Box
           flexDirection={"column"}
-          sx={{mt: 6, mb: 2}}
+          sx={{ mt: 6, mb: 2 }}
         >
           <Typography variant='h4' textAlign={"center"}>Desafio psicomanager</Typography>
           <Typography textAlign={"center"} color={'primary'}>Listagem de Postagem</Typography>
@@ -120,7 +120,7 @@ export default function Posts() {
           <Button
             variant='contained'
             size='small'
-            sx={{justifySelf:'left'}}
+            sx={{ justifySelf: 'left' }}
             onClick={() => setFormPostTarget({
               title: '',
               body: '',
@@ -134,14 +134,12 @@ export default function Posts() {
           container
           justifyContent={"center"}
           alignContent={"center"}
-          direction={"row"}
           spacing={2}
-          maxWidth={1366}
           width={'100%'}
           ml={'auto'}
           mr={'auto'}
           p={4}
-          sx={{borderRadius: '15px', bgcolor: '#EEEEEE'}}
+          sx={{ borderRadius: '15px', bgcolor: '#EEEEEE' }}
         >
           {currentPosts.map((item, index) =>
             <Post
@@ -162,8 +160,8 @@ export default function Posts() {
             showLastButton={true}
             hideNextButton={true}
             hidePrevButton={true}
-            onChange={(e, value) => {paginate(value)}}
-            sx={{mt: 2}}
+            onChange={(e, value) => { paginate(value) }}
+            sx={{ mt: 2 }}
           />
         </Grid>
       </Grid>
