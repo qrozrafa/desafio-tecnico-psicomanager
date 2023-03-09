@@ -1,16 +1,18 @@
 import { Box, Button, Grid, Pagination, Typography } from "@mui/material";
 import { Add } from "@mui/icons-material";
-import { useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { PostDto } from '../../dtos';
 import Post from './post';
-import { PostsContext } from '../../context';
+import { PostsContext, SnackbarContext } from '../../context';
 import Confirm from "../commons/confirm";
 import Comments from "./comments";
 import PostForm from "./post-form";
 import PostsLoading from "../commons/posts-loading";
+import BackDrop from "../commons/backdrop";
 
 export default function Posts() {
   const postsContext = useContext(PostsContext);
+  const snackbarContext = useContext(SnackbarContext);
   const [posts, setPosts] = useState<PostDto[]>([]);
   const [removePostTarget, setRemovePostTarget] = useState<PostDto | null>(null);
   const [commentPostTarget, setCommentPostTarget] = useState<PostDto | null>(null);
@@ -18,47 +20,62 @@ export default function Posts() {
   const [currentPage, setCurrentPage] = useState(1);
   const [postsPerPage] = useState(6);
   const [loadingPost, setLoadingPost] = useState(false);
+  const [processing, setProcessing] = useState(false);
+  
+  const loadPosts = useCallback(() => { 
+    setProcessing(true);
 
-  useEffect(() => { 
-    setLoadingPost(true);
-    loadPosts(); 
-  }, []);
-
-  function loadPosts() { 
     postsContext.list()
     .then((list) => {
-      setLoadingPost(false)
-      setPosts(list)
+      setLoadingPost(false);
+      setPosts(list);
     })
-    .catch((e) => window.alert(e));
-  }
+    .catch((e) => snackbarContext.error(e))
+    .finally(() => setProcessing(false));
+  }, [postsContext, snackbarContext]);
+  
+  useEffect(() => { 
+    setLoadingPost(true);
+    loadPosts();
+  }, [loadPosts]);
 
   function handleConfirmRemove(post: PostDto) {
+    setProcessing(true);
+
     postsContext
     .remove(post.id!)
-    .then(() => loadPosts())
-    .catch(() => window.alert('erro ao tentar remover post'))
-    .finally(() => setRemovePostTarget(null));
+    .then(() => {
+      snackbarContext.success('Post removido com sucesso.')
+      loadPosts();
+    })
+    .catch(() => snackbarContext.error('Erro ao tentar remover post.'))
+    .finally(() => {
+      setRemovePostTarget(null);
+      setProcessing(false);
+    });
   };
 
   function handleSave(post: PostDto) {
+    setProcessing(true);
     const isDuplicate = posts.some((p) =>
       p.title.toLowerCase() === post.title.toLocaleLowerCase()
       && p.id !== post.id
     );
 
     if (isDuplicate) {
-      window.alert('O título informado já existe');
+      snackbarContext.error('O título informado já existe.');
       return;
     }
 
     postsContext
     [post.id ? 'update' : 'create'](post)
     .then(() => {
+      snackbarContext.success('Post salvo com sucesso.')
       setFormPostTarget(null);
       loadPosts();
     })
-    .catch(() => window.alert('erro ao tentar salvar post'));
+    .catch(() => snackbarContext.error('Erro ao tentar salvar post.'))
+    .finally(() => setProcessing(false));
   };
 
 
@@ -166,6 +183,7 @@ export default function Posts() {
         onCreate={handleSave}
         onClose={() => setFormPostTarget(null)}
       />
+      <BackDrop show={processing} />
     </>
   )
 }

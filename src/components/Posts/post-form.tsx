@@ -1,6 +1,6 @@
 import { Close } from '@mui/icons-material';
 import { useEffect, useState } from 'react';
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, TextField } from '@mui/material';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, IconButton, TextField } from '@mui/material';
 import { PostDto } from '../../dtos';
 
 interface PostFormProps {
@@ -10,13 +10,17 @@ interface PostFormProps {
 }
 
 export default function PostForm(props: PostFormProps) {
+  const [changed, setChanged] = useState<boolean>(false);
   const [post, setPost] = useState<PostDto>({
     title: '',
     body: '',
   });
 
   useEffect(() => {
-    props.post && setPost(props.post);
+    if (!props.post) return;
+    
+    setChanged(false);
+    setPost(props.post);
   }, [props.post]);
 
   function handleChange(key: string, value: any) {
@@ -24,6 +28,7 @@ export default function PostForm(props: PostFormProps) {
       ...post,
       [key]: value,
     });
+    setChanged(true);
   }
 
   function handleSubmit() {
@@ -51,20 +56,42 @@ export default function PostForm(props: PostFormProps) {
         {props.post?.id ? 'Editar' : 'Criar'} Post
       </DialogTitle>
       <DialogContent>
-      <TextField
-          label="Título"
-          placeholder='Título'
-          value={post.title}
-          onChange={(e) => handleChange('title', e.target.value || '')}  
-        />
-        <TextField
-          multiline
-          rows={4}
-          label="Texto"
-          placeholder='Texto'
-          value={post.body}
-          onChange={(e) => handleChange('body', e.target.value || '')}
-        />
+        <Grid
+          container
+          justifyContent={"center"}
+          alignContent="center"
+          p={1}
+        >
+          <Grid
+            item
+            xs={12}
+            mb={1}
+          >
+            <TextField
+              label="Título"
+              placeholder='Título'
+              value={post.title}
+              size="small"
+              fullWidth
+              onChange={(e) => handleChange('title', e.target.value || '')}  
+            />
+          </Grid>
+          <Grid
+            item
+            xs={12}
+          >  
+            <TextField
+              multiline
+              rows={4}
+              size="small"
+              label="Texto"
+              placeholder='Texto'
+              value={post.body}
+              fullWidth
+              onChange={(e) => handleChange('body', e.target.value || '')}
+            />
+          </Grid>
+        </Grid>
       </DialogContent>
       <DialogActions>
         <Button
@@ -72,6 +99,7 @@ export default function PostForm(props: PostFormProps) {
           color="success"
           variant='contained'
           fullWidth
+          disabled={!changed}
         >
           {props.post?.id ? 'Salvar' : 'Criar'}
         </Button>

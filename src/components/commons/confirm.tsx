@@ -16,18 +16,18 @@ export default function Confirm(props: ConfirmProps) {
     >
       <DialogTitle>{props.title || 'Confirmar'}</DialogTitle>
       <DialogContent>
-        <Typography>{props.text}</Typography>
+        <Typography color={'error'}>{props.text}</Typography>
       </DialogContent>
       <DialogActions>
         <Button
           onClick={() => props.onCancel()}
-          color="primary"
+          color="success"
         >
           Cancelar
         </Button>
         <Button
           onClick={() => props.onConfirm()}
-          color="primary"
+          color="error"
         >
           Confirmar
         </Button>
