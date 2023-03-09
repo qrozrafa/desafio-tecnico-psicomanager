@@ -11,6 +11,7 @@ interface PostFormProps {
 
 export default function PostForm(props: PostFormProps) {
   const [changed, setChanged] = useState<boolean>(false);
+  const [errors, setErrors] = useState<any>({});
   const [post, setPost] = useState<PostDto>({
     title: '',
     body: '',
@@ -18,7 +19,7 @@ export default function PostForm(props: PostFormProps) {
 
   useEffect(() => {
     if (!props.post) return;
-    
+
     setChanged(false);
     setPost(props.post);
   }, [props.post]);
@@ -29,18 +30,29 @@ export default function PostForm(props: PostFormProps) {
       [key]: value,
     });
     setChanged(true);
+    setErrors(getFormErrors());
+  }
+
+  function getFormErrors(): any {
+    const errs: any = {};
+
+    if (post.title.length < 3) {
+      errs.title = 'O título deve conter pelo menos 3 letras.';
+    }
+    if (post.body.length < 3) {
+      errs.body = 'O texto deve conter pelo menos 3 letras.';
+    }
+
+    return errs;
   }
 
   function handleSubmit() {
-    if (post.title.length < 3) {
-      window.alert('O título deve conter pelo menos 3 letras.');
-      return;
-    }
-    if (post.body.length < 3) {
-      window.alert('O texto deve conter pelo menos 3 letras.');
-      return;
-    }
+    const errs = getFormErrors();
 
+    setErrors(errs);
+
+    if (Object.keys(errs).length !== 0) return;
+    
     props.onCreate(post);
   }
 
@@ -61,11 +73,12 @@ export default function PostForm(props: PostFormProps) {
           justifyContent={"center"}
           alignContent="center"
           p={1}
+          maxWidth={428}
         >
           <Grid
             item
             xs={12}
-            mb={1}
+            mb={1}  
           >
             <TextField
               label="Título"
@@ -73,13 +86,16 @@ export default function PostForm(props: PostFormProps) {
               value={post.title}
               size="small"
               fullWidth
-              onChange={(e) => handleChange('title', e.target.value || '')}  
+              onChange={(e) => handleChange('title', e.target.value || '')}
+              error={Boolean(errors.title)}
+              helperText={errors.title || null}
+              sx={{maxWidth: 428}}
             />
           </Grid>
           <Grid
             item
             xs={12}
-          >  
+          >
             <TextField
               multiline
               rows={4}
@@ -89,6 +105,9 @@ export default function PostForm(props: PostFormProps) {
               value={post.body}
               fullWidth
               onChange={(e) => handleChange('body', e.target.value || '')}
+              error={Boolean(errors.body)}
+              helperText={errors.body || null}
+              sx={{maxWidth: 428}}
             />
           </Grid>
         </Grid>

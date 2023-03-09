@@ -3,8 +3,8 @@ import { SnackMsgDto } from "../dtos";
 
 export const SnackbarContext = createContext({
   msg: {} as SnackMsgDto | null,
-  success: (message: string, duration = 3000): void => {},
-  error: (message: string, duration = 3000): void => {},
+  success: (message: string, duration = 3000): void => { },
+  error: (message: string, duration = 3000): void => { },
 });
 
 export default function SnackbarProvider(props: any) {
@@ -26,7 +26,7 @@ export default function SnackbarProvider(props: any) {
     });
   }
 
-  return (  
+  return (
     <SnackbarContext.Provider value={{ msg, success, error }}>
       {props.children}
     </SnackbarContext.Provider>

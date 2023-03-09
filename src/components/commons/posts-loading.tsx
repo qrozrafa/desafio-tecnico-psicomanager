@@ -18,7 +18,7 @@ export default function PostsLoading() {
       >
         <Box
           flexDirection={"column"}
-          sx={{mt: 6, mb: 2}}
+          sx={{ mt: 6, mb: 2 }}
         >
           <Typography variant='h4' textAlign={"center"}>Desafio psicomanager</Typography>
           <Typography textAlign={"center"} color={'primary'}>Listagem de Postagem</Typography>
@@ -27,7 +27,7 @@ export default function PostsLoading() {
         <Grid
           item
           xs={12}
-          sx={{borderRadius: '15px', bgcolor: '#EEEEEE' }}
+          sx={{ borderRadius: '15px', bgcolor: '#eeeeee' }}
           p={1}
         >
           <TextLoading />

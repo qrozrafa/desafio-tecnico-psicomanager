@@ -14,44 +14,66 @@ export default function Post(props: PostProps) {
   return (
     <>
       <Grid
-        item
-        xs={12}
-        display={"flex"}
-        justifyContent={'space-between'}
-        sx={{borderRadius: '15px', bgcolor: '#EEEEEE', ':hover': {bgcolor: '#e4e4e4'}}}
-        p={1}
+        container
+        justifyContent={'center'}
+        sx={{ borderRadius: '15px', ':hover': { bgcolor: '#e4e4e4' } }}
+        p={2}
       >
         <Grid
-          item
-          xs={12}
-          display={"flex"}
+          container
           justifyContent={'space-between'}
-          mt={1}
-          p={1}
-          width={900}
-          sx={{cursor: 'pointer'}}
+          sx={{ cursor: 'pointer' }}
           onClick={() => props.onClick(props.post)}
-        > 
-          <Typography fontWeight={500}>{props.post.id}</Typography>
-          <Typography variant="h6" sx={{ml: 1}} width={"40%"}>{props.post.title}</Typography>
-          <Typography variant="body2" sx={{ml: 1}} width={"40%"}>{props.post.body}</Typography>
+          maxWidth={1100}
+          spacing={4}
+        >
+          <Grid
+            item
+            xs={12}
+            sm={12}
+            md={2}
+          >
+            <Typography fontWeight={500}>{props.post.id}</Typography>
+          </Grid>
+          <Grid
+            item
+            xs={12}
+            sm={12}
+            md={4}
+          >
+            <Typography variant="h6" >{props.post.title}</Typography>
+          </Grid>
+          <Grid
+            item
+            xs={12}
+            sm={12}
+            md={6}
+          >
+            <Typography variant="body2" >{props.post.body}</Typography>
+          </Grid>
         </Grid>
-        <IconButton
-          title='Editar'
-          size="small"
-          sx={{mt: 1, maxHeight: 40}}
-          onClick={() => props.onEdit(props.post)}
+        <Grid
+          container
+          justifyContent={"end"}
+          pt={1}
         >
-          <Edit />
-        </IconButton>
-        <IconButton
-          title='Excluir'
-          size="small"
-          sx={{mt: 1, maxHeight: 40}}
-          onClick={() => props.onRemove(props.post)}
-        >
-          <Delete />
-        </IconButton>
+          <IconButton
+            title='Editar'
+            size="small"
+            sx={{ maxHeight: 40 }}
+            onClick={() => props.onEdit(props.post)}
+          >
+            <Edit color="primary" />
+          </IconButton>
+          <IconButton
+            title='Excluir'
+            size="small"
+            sx={{ maxHeight: 40 }}
+            onClick={() => props.onRemove(props.post)}
+          >
+            <Delete color="error" />
+          </IconButton>
+        </Grid>
       </Grid>
     </>
   )
