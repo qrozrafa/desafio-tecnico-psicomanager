@@ -168,7 +168,7 @@ export default function Posts() {
         </Grid>
       </Grid>
       <Confirm
-        title={`Excluir o post ${removePostTarget?.id}`}
+        title={`Excluir o post ${removePostTarget?.id || ''}`}
         show={Boolean(removePostTarget)}
         text="Atenção! Ao excluir esta postagem os comentários também serão excluídos."
         onCancel={() => setRemovePostTarget(null)}
