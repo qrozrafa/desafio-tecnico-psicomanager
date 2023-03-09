@@ -1,9 +1,7 @@
 import { Close } from '@mui/icons-material';
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, IconButton, TextField } from '@mui/material';
 import { PostDto } from '../../dtos';
-import { AlertContext } from '../../context';
-import Alert from '../commons/alert';
 
 interface PostFormProps {
   post?: PostDto | null;
@@ -12,9 +10,8 @@ interface PostFormProps {
 }
 
 export default function PostForm(props: PostFormProps) {
-  const alertContext = useContext(AlertContext);
   const [changed, setChanged] = useState<boolean>(false);
-  const [alert, setAlert] = useState<boolean>(false);
+  const [errors, setErrors] = useState<any>({});
   const [post, setPost] = useState<PostDto>({
     title: '',
     body: '',
@@ -33,21 +30,29 @@ export default function PostForm(props: PostFormProps) {
       [key]: value,
     });
     setChanged(true);
+    setErrors(getFormErrors());
+  }
+
+  function getFormErrors(): any {
+    const errs: any = {};
+
+    if (post.title.length < 3) {
+      errs.title = 'O título deve conter pelo menos 3 letras.';
+    }
+    if (post.body.length < 3) {
+      errs.body = 'O texto deve conter pelo menos 3 letras.';
+    }
+
+    return errs;
   }
 
   function handleSubmit() {
-    if (post.title.length < 3) {
-      setAlert(true);
-      alertContext.error('O título deve conter pelo menos 3 letras.');
-      return;
-    }
-    if (post.body.length < 3) {
-      setAlert(true);
-      alertContext.error('O texto deve conter pelo menos 3 letras.');
-      return;
-    }
+    const errs = getFormErrors();
 
-    setAlert(false)
+    setErrors(errs);
+
+    if (Object.keys(errs).length !== 0) return;
+    
     props.onCreate(post);
   }
 
@@ -63,17 +68,17 @@ export default function PostForm(props: PostFormProps) {
         {props.post?.id ? 'Editar' : 'Criar'} Post
       </DialogTitle>
       <DialogContent>
-        <Alert status={alert} />
         <Grid
           container
           justifyContent={"center"}
           alignContent="center"
           p={1}
+          maxWidth={428}
         >
           <Grid
             item
             xs={12}
-            mb={1}
+            mb={1}  
           >
             <TextField
               label="Título"
@@ -82,6 +87,9 @@ export default function PostForm(props: PostFormProps) {
               size="small"
               fullWidth
               onChange={(e) => handleChange('title', e.target.value || '')}
+              error={Boolean(errors.title)}
+              helperText={errors.title || null}
+              sx={{maxWidth: 428}}
             />
           </Grid>
           <Grid
@@ -97,6 +105,9 @@ export default function PostForm(props: PostFormProps) {
               value={post.body}
               fullWidth
               onChange={(e) => handleChange('body', e.target.value || '')}
+              error={Boolean(errors.body)}
+              helperText={errors.body || null}
+              sx={{maxWidth: 428}}
             />
           </Grid>
         </Grid>

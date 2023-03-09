@@ -2,9 +2,8 @@ import { Close } from '@mui/icons-material';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, Grid, IconButton, List, ListItem, TextField, Typography } from '@mui/material';
 import { CommentDto, PostDto } from '../../dtos';
-import { AlertContext, CommentsContext, SnackbarContext } from '../../context';
+import { CommentsContext, SnackbarContext } from '../../context';
 import BackDrop from '../commons/backdrop';
-import Alert from '../commons/alert';
 
 const cleanComment: CommentDto = {
   name: '',
@@ -20,12 +19,11 @@ interface CommentProps {
 export default function Comments(props: CommentProps) {
   const snackbarContext = useContext(SnackbarContext);
   const commentsContext = useContext(CommentsContext);
-  const alertContext = useContext(AlertContext);
   const [comments, setComments] = useState<CommentDto[]>([]);
   const [comment, setComment] = useState<CommentDto>({ ...cleanComment });
-  const [processing, setProcessing] = useState(false);
+  const [processing, setProcessing] = useState<boolean>(false);
   const [changed, setChanged] = useState<boolean>(false);
-  const [alert, setAlert] = useState<boolean>(false);
+  const [errors, setErrors] = useState<any>({});
 
   const loadComments = useCallback((postId: number) => {
     setComment({ ...cleanComment });
@@ -44,6 +42,22 @@ export default function Comments(props: CommentProps) {
     loadComments(props.post.id!);
   }, [props.post, loadComments]);
 
+  function getFormErrors(): any {
+    const emailRegExp = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
+    const errs: any = {};
+
+    if (comment.name.length < 3) {
+      errs.name = 'O nome deve conter pelo menos 3 letras.';
+    }
+    if (!comment.email.match(emailRegExp)) {
+      errs.email = 'É necessário informar um email válido.';
+    }
+    if (comment.body.length < 3) {
+      errs.body = 'O comentário deve conter pelo menos 3 letras.';
+    }
+    
+    return errs;
+  }
 
   function handleChangeComment(key: string, value: any) {
     setComment({
@@ -51,40 +65,19 @@ export default function Comments(props: CommentProps) {
       [key]: value,
     });
     setChanged(true);
+    setErrors(getFormErrors());
   }
 
   function handleSubmitComment() {
-    const emailRegExp = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
-    if (!comment.name) {
-      setAlert(true);
-      alertContext.error('É necessário preencher o campo nome.');
-      return;
-    }
-    if (comment.name.length < 3) {
-      setAlert(true);
-      alertContext.error('O nome deve conter pelo menos 3 letras.');
-      return;
-    }
-    if (comment.email.length === 0) {
-      setAlert(true);
-      alertContext.error('É necessário preencher o campo email.');
-      return;
-    }
-    if (!comment.email.match(emailRegExp)) {
-      setAlert(true);
-      alertContext.error('É necessário informar um email válido.');
-      return;
-    }
-    if (comment.body.length < 3) {
-      setAlert(true);
-      alertContext.error('O comentário deve conter pelo menos 3 letras.');
-      return;
-    }
+    const errs = getFormErrors();
+
+    setErrors(errs);
+
+    if (Object.keys(errs).length !== 0) return;
 
     const postId = props.post?.id!;
     commentsContext.create({ ...comment, postId })
       .then(() => {
-        setAlert(false);
         snackbarContext.success('Comentário adicionado com sucesso.');
         loadComments(postId);
       })
@@ -160,7 +153,6 @@ export default function Comments(props: CommentProps) {
             alignContent={"center"}
             p={1}
           >
-            <Alert status={alert} />
             <Grid
               item
               xs={12}
@@ -174,6 +166,8 @@ export default function Comments(props: CommentProps) {
                 onChange={(e) => handleChangeComment('name', e.target.value || '')}
                 fullWidth
                 size='small'
+                error={Boolean(errors.name)}
+                helperText={errors.name || null}
               />
             </Grid>
             <Grid
@@ -189,6 +183,8 @@ export default function Comments(props: CommentProps) {
                 onChange={(e) => handleChangeComment('email', e.target.value || '')}
                 fullWidth
                 size='small'
+                error={Boolean(errors.email)}
+                helperText={errors.email || null}
               />
             </Grid>
             <Grid
@@ -206,6 +202,8 @@ export default function Comments(props: CommentProps) {
                 onChange={(e) => handleChangeComment('body', e.target.value || '')}
                 fullWidth
                 size='small'
+                error={Boolean(errors.body)}
+                helperText={errors.body || null}
               />
             </Grid>
             <Button
