@@ -1,5 +1,5 @@
 import { Delete, Edit } from "@mui/icons-material";
-import { Divider, Grid, IconButton, ListItem, Typography } from "@mui/material";
+import { Grid, IconButton, Typography } from "@mui/material";
 import { PostDto } from "../../dtos";
 
 interface PostProps {
@@ -52,7 +52,6 @@ export default function Post(props: PostProps) {
         >
           <Delete />
         </IconButton>
-        <Divider />
       </Grid>
     </>
   )

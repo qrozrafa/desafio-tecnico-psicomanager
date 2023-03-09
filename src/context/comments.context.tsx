@@ -11,7 +11,7 @@ export default function CommentsProvider(props: any) {
   const baseURL = process.env.REACT_APP_API_RB;
 
   async function create(comment: CommentDto): Promise<void> {
-    return axios.post(`${baseURL}/post/comments`, comment);
+    return axios.post(`${baseURL}/comments`, comment);
   }
 
   function list(postId: number): Promise<CommentDto[]> {

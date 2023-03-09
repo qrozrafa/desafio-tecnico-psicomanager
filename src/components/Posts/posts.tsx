@@ -1,56 +1,81 @@
 import { Box, Button, Grid, Pagination, Typography } from "@mui/material";
 import { Add } from "@mui/icons-material";
-import { useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { PostDto } from '../../dtos';
 import Post from './post';
-import { PostsContext } from '../../context';
+import { PostsContext, SnackbarContext } from '../../context';
 import Confirm from "../commons/confirm";
 import Comments from "./comments";
 import PostForm from "./post-form";
+import PostsLoading from "../commons/posts-loading";
+import BackDrop from "../commons/backdrop";
 
 export default function Posts() {
   const postsContext = useContext(PostsContext);
+  const snackbarContext = useContext(SnackbarContext);
   const [posts, setPosts] = useState<PostDto[]>([]);
   const [removePostTarget, setRemovePostTarget] = useState<PostDto | null>(null);
   const [commentPostTarget, setCommentPostTarget] = useState<PostDto | null>(null);
   const [formPostTarget, setFormPostTarget] = useState<PostDto | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [postsPerPage] = useState(6);
+  const [loadingPost, setLoadingPost] = useState(false);
+  const [processing, setProcessing] = useState(false);
+  
+  const loadPosts = useCallback(() => { 
+    setProcessing(true);
 
-  useEffect(() => { loadPosts(); }, []);
-
-  function loadPosts() { 
     postsContext.list()
-    .then((list) => setPosts(list))
-    .catch((e) => window.alert(e));
-  }
+    .then((list) => {
+      setLoadingPost(false);
+      setPosts(list);
+    })
+    .catch((e) => snackbarContext.error(e))
+    .finally(() => setProcessing(false));
+  }, [postsContext, snackbarContext]);
+  
+  useEffect(() => { 
+    setLoadingPost(true);
+    loadPosts();
+  }, [loadPosts]);
 
   function handleConfirmRemove(post: PostDto) {
+    setProcessing(true);
+
     postsContext
     .remove(post.id!)
-    .then(() => loadPosts())
-    .catch(() => window.alert('erro ao tentar remover post'))
-    .finally(() => setRemovePostTarget(null));
+    .then(() => {
+      snackbarContext.success('Post removido com sucesso.')
+      loadPosts();
+    })
+    .catch(() => snackbarContext.error('Erro ao tentar remover post.'))
+    .finally(() => {
+      setRemovePostTarget(null);
+      setProcessing(false);
+    });
   };
 
   function handleSave(post: PostDto) {
+    setProcessing(true);
     const isDuplicate = posts.some((p) =>
       p.title.toLowerCase() === post.title.toLocaleLowerCase()
       && p.id !== post.id
     );
 
     if (isDuplicate) {
-      window.alert('O título informado já existe');
+      snackbarContext.error('O título informado já existe.');
       return;
     }
 
     postsContext
     [post.id ? 'update' : 'create'](post)
     .then(() => {
+      snackbarContext.success('Post salvo com sucesso.')
       setFormPostTarget(null);
       loadPosts();
     })
-    .catch(() => window.alert('erro ao tentar salvar post'));
+    .catch(() => snackbarContext.error('Erro ao tentar salvar post.'))
+    .finally(() => setProcessing(false));
   };
 
 
@@ -60,6 +85,10 @@ export default function Posts() {
 
   function paginate(pageNumber: any): void {
     return setCurrentPage(pageNumber);
+  }
+
+  if (loadingPost) {
+    return(<PostsLoading />) 
   }
 
   return (
@@ -73,21 +102,23 @@ export default function Posts() {
         width={'100%'}
         ml={'auto'}
         mr={'auto'}
+        mb={6}
       >
+
         <Box
-          flexDirection={'column'}
-          mb={4}
+          flexDirection={"column"}
+          sx={{mt: 6, mb: 2}}
         >
-          <Typography variant='h4' sx={{mt: 4}}>Desafio psicomanager</Typography>
-          <Typography variant='body1' textAlign={'center'}>Rafael de Queiroz Silva</Typography>
+          <Typography variant='h4' textAlign={"center"}>Desafio psicomanager</Typography>
+          <Typography textAlign={"center"} color={'primary'}>Listagem de Postagem</Typography>
         </Box>
+
         <Grid
           item
           xs={10}
         >
           <Button
             variant='contained'
-            color='success'
             size='small'
             sx={{justifySelf:'left'}}
             onClick={() => setFormPostTarget({
@@ -152,6 +183,7 @@ export default function Posts() {
         onCreate={handleSave}
         onClose={() => setFormPostTarget(null)}
       />
+      <BackDrop show={processing} />
     </>
   )
 }
